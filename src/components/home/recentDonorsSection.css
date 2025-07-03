@@ -1,0 +1,42 @@
+:root{
+    --base-duration: 20s;
+}
+.rcDonor{
+    height: calc(132px * 3 + 60px);
+    position: relative;
+    overflow: hidden;   
+}
+.scrollRow{
+    position: absolute;
+    display: flex;
+    height: 80px;
+    animation: ltr calc(var(--base-duration) * 1) linear infinite;
+}
+.scrollRow:nth-child(1){
+    top: calc(132px + 30px);
+    animation: rtl calc(var(--base-duration) * 1.15) linear infinite;
+}
+.scrollRow:nth-child(2){
+    top: calc(132px * 2 + 60px);
+    animation: ltr calc(var(--base-duration) * 0.9) linear infinite;
+}
+.donorCard{
+    min-width: fit-content;
+}
+
+@keyframes ltr {
+    0%{
+        transform: translateX(0%);
+    }
+    100%{
+        transform: translateX(-50%);
+    }
+}
+@keyframes rtl {
+    0%{
+        transform: translateX(-50%);
+    }
+    100%{
+        transform: translateX(0%);
+    }
+}

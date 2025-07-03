@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom gradient border animation */
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-border-button {
+  position: relative;
+  z-index: 0;
+  border-radius: 9999px; /* rounded-full */
+  overflow: hidden;
+}
+
+.gradient-border-button::before {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  background-image: linear-gradient(60deg, #f59e0b, #ec4899, #8b5cf6, #d406b2, #10b981);
+  animation: gradient-animation 4s linear infinite;
+}
+
+.gradient-border-button::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  background: var(--button-bg, #7c3aed);
+  border-radius: 9999px; /* rounded-full */
+}
+
+.gradient-border-accent::after {
+  --button-bg: #f59e0b; /* accent-500 color */
+}
+
+.gradient-border-transparent::after {
+  --button-bg: rgba(255, 255, 255, 0.2); /* bg-white bg-opacity-20 */
+}
+
+.gradient-border-blue::after {
+  --button-bg: #3b82f6; /* blue-500 color */
+}
+
+/* Gradient border for latest news cards */
+.gradient-border-news {
+  position: relative;
+  z-index: 0;
+  border-radius: 0.5rem; /* rounded-lg */
+  overflow: hidden;
+}
+
+.gradient-border-news::before {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  background-image: linear-gradient(60deg, #3b82f6, #60a5fa, #93c5fd, #3b82f6);
+  animation: gradient-animation 4s linear infinite;
+}
+
+.gradient-border-news::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 2px;
+  top: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  background: white;
+  border-radius: 0.5rem; /* rounded-lg */
+}
