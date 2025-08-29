@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: donation-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/donation-app
+      - MONGO_MAX_POOL_SIZE=10
+      - MONGO_MIN_POOL_SIZE=5
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=90d
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - CHAPA_SECRET_KEY=${CHAPA_SECRET_KEY}
+      - CHAPA_WEBHOOK_SECRET=${CHAPA_WEBHOOK_SECRET}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+    volumes:
+      - ./backend/logs:/app/logs
+    depends_on:
+      - mongodb
+    networks:
+      - donation-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB service
+  mongodb:
+    image: mongo:6
+    container_name: donation-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=donation-app
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - donation-network
+    command: ["--bind_ip", "0.0.0.0"]
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/donation-app --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend service (if needed)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: donation-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - REACT_APP_API_URL=http://backend:5000/api
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - donation-network
+
+networks:
+  donation-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:

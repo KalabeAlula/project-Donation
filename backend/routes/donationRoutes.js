@@ -1,10 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { createDonation, getDonations, verifyPayment } = require('../controllers/donationController');
+const { createDonation, getDonations, verifyPayment, verifyChapa } = require('../controllers/donationController');
 
 // @route   POST /api/donations
 // @desc    Create a new donation
 router.post('/', createDonation);
+
+// @route   POST /api/donations/verify-chapa
+// @desc    Verify Chapa payment callback
+router.post('/verify-chapa', verifyChapa);
 
 // @route   PUT /api/donations/:id/verify
 // @desc    Verify payment status

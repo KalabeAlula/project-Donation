@@ -45,7 +45,6 @@ const Header: React.FC = () => {
           {[
             { name: 'Home', path: '/' },
             { name: 'Causes', path: '/#causes' },
-            { name: 'Impact', path: '/#impact' },
             { name: 'News', path: '/news' },
             { name: 'About', path: '/about' },
             { name: 'Contact', path: '/contact' }
@@ -97,7 +96,6 @@ const Header: React.FC = () => {
           {[
             { name: 'Home', path: '/' },
             { name: 'Causes', path: '/#causes' },
-            { name: 'Impact', path: '/#impact' },
             { name: 'News', path: '/news' },
             { name: 'About', path: '/about' },
             { name: 'Contact', path: '/contact' },

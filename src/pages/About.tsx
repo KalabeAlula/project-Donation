@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
+import TeamMemberImage from '../components/TeamMemberImage';
 
 const About: React.FC = () => {
   return (
@@ -42,7 +43,7 @@ const About: React.FC = () => {
               >
                 <h2 className="font-display font-bold text-3xl text-gray-900 mb-6">Our Story</h2>
                 <p className="text-gray-600 mb-4">
-                  GGlory Integrated Development Foundation (GIDF) originated from a proposal to establish the Gondar Boarding School, initiated in February 2016 in Addis Ababa. The school aims to meet the growing demand for high-quality, structured, and disciplined boarding education in Ethiopia, particularly in the Amhara region. This initiative reflects a shared vision among the founding board members to create a modern educational model that equips students to excel academically, socially, and ethically in both national and global contexts
+                  GGlory Integrated Development Foundation (GIDF) originated from a proposal to establish the Gondar Boarding School, initiated in February 2025 in Addis Ababa. The school aims to meet the growing demand for high-quality, structured, and disciplined boarding education in Ethiopia, particularly in the Amhara region. This initiative reflects a shared vision among the founding board members to create a modern educational model that equips students to excel academically, socially, and ethically in both national and global contexts
                 </p>
                 <p className="text-gray-600 mb-4">
                 The foundation was established in response to the significant and recurring decline in academic performance among students in the Amhara region and other parts of Ethiopia, particularly in national examinations such as the Grade 12 University entrance exam. Pass rates have consistently dropped, highlighting a broader crisis in educational equity and access. Many high-potential students fail not due to a lack of talent or ambition
@@ -176,59 +177,59 @@ const About: React.FC = () => {
                 {
                   name: 'Asmaru Berihun Kebede',
                   role: ' Board chair person',
-                  image: '/Logo.png'
+                  image: '/AsmaruBerihunKebed.jpeg'
                 },
                 {
                   name: 'Hiwot Alemu Taffere',
                   role: 'Board Member',
-                  image: '/Logo.png'
+                  image: '/HiwotAlemuTaffer.jpeg'
                 },
                 {
                   name: 'Etsegenet Alrmu',
                   role: 'Board Member',
-                  image: '/Logo.png'
+                  image: '/EtsegenetAlrm.jpeg'
                 },
                 {
                   name: 'Assefa Negasa Gudeta',
                   role: 'Board Member',
-                  image: '/Logo.png'
+                  image: '/AssefaNegasaGudet.jpeg'
                 },
 
                 {
                   name: 'Alemu Taffere  Tessema',
                   role: 'CEO and Board Secretary without Vote',
-                  image: '/Logo.png'
+                  image: '/AlemuTaffereTessem.jpeg'
                 },
                 {
                   name: 'Endalk Alemu',
                   role: 'Deputy Chairperson',
-                  image: '/Logo.png'
+                  image: '/EndalkAlem.jpeg'
                 },
 
                 {
                   name: 'Mrs. Bizuhan Getnet Gedamu',
                   role: 'Project Manager of GID',
-                  image: '/Bizuhan.png'
+                  image: '/BizuhanGetnetGedam.jpeg'
                 },
                 {
                   name: 'Denekew Berihun Kebede',
                   role: 'IT Expert and Foreign Relation Head',
-                  image: '/Logo.png'
+                  image: '/DenekewBerihunKebed.jpeg'
                 },
                 {
                   name: 'Elesabet Abuneha Mengesha',
                   role: 'Auditor',
-                  image: '/elesabet.png'
+                  image: '/ElesabetAbunehaMengesh.jpeg'
                 },
                 {
                   name: 'Helom Fantahun  Yemam',
                   role: 'Cashier',
-                  image: '/helom (1).png'
+                  image: '/HelomFantahunYema.jpeg'
                 },
                 {
                   name: 'Samueal Wolelawu Amare',
                   role: 'Finance Head',
-                  image: '/Logo.png'
+                  image: '/SamuealWolelawuAmar.jpeg'
                 },
               ].map((member, index) => (
                 <motion.div
@@ -239,15 +240,14 @@ const About: React.FC = () => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    className="w-full h-64 object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://placehold.co/300x300/0ea5e9/ffffff?text=' + member.name.split(' ').map(n => n[0]).join('');
-                    }}
-                  />
+                  <div className="w-full h-64 overflow-hidden">
+                    <TeamMemberImage 
+                      src={member.image} 
+                      alt={member.name} 
+                      className="w-full h-64"
+                      adjustPosition={member.name === 'Denekew Berihun Kebede'}
+                    />
+                  </div>
                   <div className="p-4 text-center">
                     <h3 className="font-display font-bold text-xl text-gray-900">{member.name}</h3>
                     <p className="text-primary-600">{member.role}</p>

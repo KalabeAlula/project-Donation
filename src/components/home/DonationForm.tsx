@@ -15,6 +15,8 @@ const DonationForm: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>('credit_card');
   const [showBankDetails, setShowBankDetails] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [chapaCheckoutUrl, setChapaCheckoutUrl] = useState<string>('');
+  const [donationData, setDonationData] = useState<any>(null);
   
   const handleAmountClick = (value: number) => {
     setAmount(value);
@@ -44,14 +46,35 @@ const DonationForm: React.FC = () => {
           email,
           amount,
           paymentType,
-          paymentMethod,
+          paymentMethod: paymentMethod === 'credit_card' ? 'chapa' : paymentMethod, // Ensure 'credit_card' is sent as 'chapa'
           isCompany: false
         };
         
+        console.log('Submitting donation data:', donationData);
+        
         const response = await axios.post(`${API_URL}/api/donations`, donationData);
         
+        console.log('Donation response:', response.data);
+        
         if (response.data.success) {
-          setIsDonationComplete(true);
+          console.log('Payment method:', paymentMethod);
+          console.log('Checkout URL exists:', !!response.data.data.checkout_url);
+          
+          if (paymentMethod === 'credit_card' && response.data.data.checkout_url) {
+            // For Chapa payments, store the checkout URL and redirect
+            console.log('Redirecting to Chapa checkout:', response.data.data.checkout_url);
+            setChapaCheckoutUrl(response.data.data.checkout_url);
+            setDonationData(response.data.data.donor);
+            
+            // Redirect to Arifpay checkout page
+            window.location.href = response.data.data.checkout_url;
+            return; // Exit early to prevent showing completion screen
+          } else {
+            // For other payment methods, show completion screen
+            console.log('Showing completion screen for non-Chapa payment');
+            setDonationData(response.data.data);
+            setIsDonationComplete(true);
+          }
         } else {
           setError('There was a problem processing your donation. Please try again.');
         }
@@ -72,6 +95,8 @@ const DonationForm: React.FC = () => {
     setPaymentMethod('credit_card');
     setShowBankDetails(false);
     setIsDonationComplete(false);
+    setChapaCheckoutUrl('');
+    setDonationData(null);
     setError('');
   };
   
@@ -126,7 +151,7 @@ const DonationForm: React.FC = () => {
                     <motion.button
                       key={value}
                       type="button"
-                      className={`py-3 rounded-lg font-medium text-lg transition-colors ${amount === value ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`py-3 rounded-lg font-medium text-lg transition-colors ${amount === value && customAmount === '' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                       onClick={() => handleAmountClick(value)}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
@@ -143,7 +168,7 @@ const DonationForm: React.FC = () => {
                         placeholder="Custom Amount"
                         value={customAmount}
                         onChange={handleCustomAmountChange}
-                        className="w-full py-3 pl-10 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className={`w-full py-3 pl-10 pr-4 border ${customAmount !== '' ? 'border-primary-500 ring-2 ring-primary-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
                       />
                     </div>
                   </div>
@@ -177,32 +202,7 @@ const DonationForm: React.FC = () => {
                   />
                 </div>
                 
-                {/* Donation Frequency - simplified for the demo */}
-                <div className="mb-6">
-                  <h3 className="text-xl font-display font-semibold mb-4">Donation Frequency</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <motion.button
-                      type="button"
-                      className={`py-3 px-4 rounded-lg font-medium ${paymentType === 'one-time' ? 'bg-primary-50 text-primary-800 border border-primary-200' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-100'}`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setPaymentType('one-time')}
-                      disabled={false}
-                    >
-                      One-time
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      className={`py-3 px-4 rounded-lg font-medium ${paymentType === 'monthly' ? 'bg-primary-50 text-primary-800 border border-primary-200' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-100'} ${paymentMethod === 'bank_transfer' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      whileHover={{ scale: paymentMethod === 'bank_transfer' ? 1 : 1.02 }}
-                      whileTap={{ scale: paymentMethod === 'bank_transfer' ? 1 : 0.98 }}
-                      onClick={() => paymentMethod !== 'bank_transfer' && setPaymentType('monthly')}
-                      disabled={paymentMethod === 'bank_transfer'}
-                    >
-                      Monthly
-                    </motion.button>
-                  </div>
-                </div>
+                {/* Donation Frequency removed as requested */}
                 
                 {/* Payment Method */}
                 <div className="mb-8">
@@ -218,7 +218,7 @@ const DonationForm: React.FC = () => {
                         setShowBankDetails(false);
                       }}
                     >
-                      Chapa
+                      Credit Card
                     </motion.button>
                     <motion.button
                       type="button"
@@ -310,16 +310,16 @@ const DonationForm: React.FC = () => {
                 </p>
                 <div className="mb-8 p-4 bg-blue-50 rounded-lg">
                   <p className="text-blue-800 font-medium">
-                    Payment Method: <span className="capitalize">{paymentMethod.replace('_', ' ')}</span>
+                    Payment Method: <span className="capitalize">{donationData?.paymentMethod?.replace('_', ' ') || paymentMethod.replace('_', ' ')}</span>
                   </p>
                   <p className="text-blue-800 font-medium mt-1">
-                    Amount: ${amount}
+                    Amount: ${donationData?.amount || amount}
                   </p>
                   <p className="text-blue-800 font-medium mt-1">
-                    Frequency: {paymentType === 'one-time' ? 'One-time donation' : 'Monthly donation'}
+                    Frequency: {(donationData?.paymentType || paymentType) === 'one-time' ? 'One-time donation' : 'Monthly donation'}
                   </p>
                   
-                  {paymentMethod === 'bank_transfer' && (
+                  {(donationData?.paymentMethod || paymentMethod) === 'bank_transfer' && (
                     <div className="mt-3 pt-3 border-t border-blue-200">
                       <p className="text-blue-800 font-medium mb-2">Bank Transfer Details:</p>
                       <div className="space-y-2">
