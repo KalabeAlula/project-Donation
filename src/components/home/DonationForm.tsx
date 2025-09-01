@@ -156,19 +156,18 @@ const DonationForm: React.FC = () => {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                     >
-                      ${value}
+                      {value}
                     </motion.button>
                   ))}
                   
                   <div className="col-span-3 mt-3">
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">$</span>
                       <input
                         type="text"
                         placeholder="Custom Amount"
                         value={customAmount}
                         onChange={handleCustomAmountChange}
-                        className={`w-full py-3 pl-10 pr-4 border ${customAmount !== '' ? 'border-primary-500 ring-2 ring-primary-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
+                        className={`w-full py-3 px-4 border ${customAmount !== '' ? 'border-primary-500 ring-2 ring-primary-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent`}
                       />
                     </div>
                   </div>
@@ -218,7 +217,7 @@ const DonationForm: React.FC = () => {
                         setShowBankDetails(false);
                       }}
                     >
-                      Credit Card
+                      Chapa
                     </motion.button>
                     <motion.button
                       type="button"
@@ -270,7 +269,7 @@ const DonationForm: React.FC = () => {
                 {/* Submit Button */}
                 <motion.button
                   type="submit"
-                  className={`w-full py-4 ${isSubmitting ? 'bg-gray-400' : 'bg-primary-600 hover:bg-accent-600'} text-white font-medium text-lg rounded-full transition-colors flex items-center justify-center`}
+                  className={`w-full py-4 ${isSubmitting ? 'bg-gray-400' : 'bg-primary-600 hover:bg-green-600'} text-white font-medium text-lg rounded-full transition-colors flex items-center justify-center`}
                   whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                   whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                   disabled={!amount || amount <= 0 || !name || !email || isSubmitting}
@@ -284,7 +283,7 @@ const DonationForm: React.FC = () => {
                       Processing...
                     </>
                   ) : (
-                    <>Donate ${amount || 0}</>
+                    <>Donate {amount || 0}</>
                   )}
                 </motion.button>
                 
@@ -313,7 +312,7 @@ const DonationForm: React.FC = () => {
                     Payment Method: <span className="capitalize">{donationData?.paymentMethod?.replace('_', ' ') || paymentMethod.replace('_', ' ')}</span>
                   </p>
                   <p className="text-blue-800 font-medium mt-1">
-                    Amount: ${donationData?.amount || amount}
+                    Amount: {donationData?.amount || amount}
                   </p>
                   <p className="text-blue-800 font-medium mt-1">
                     Frequency: {(donationData?.paymentType || paymentType) === 'one-time' ? 'One-time donation' : 'Monthly donation'}

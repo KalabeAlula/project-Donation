@@ -4,20 +4,20 @@ import { motion } from 'framer-motion';
 const testimonials = [
   {
     id: 1,
-    name: 'Sarah Johnson',
-    role: 'Monthly Donor',
+    name: 'Alemu Taffere Tessema',
+    role: 'CEO',
     content: 'Seeing my donations visualized in 3D makes giving so much more meaningful. I can actually see the impact I\'m making around the world.',
   },
   {
     id: 2,
-    name: 'Michael Chen',
-    role: 'Community Partner',
+    name: 'Denekew Berihun Kebede',
+    role: 'IT Expert',
     content: 'As a partner organization, the transparency Glory Intergrated Development Foundtion provides is unmatched. The 3D visualizations help us show our stakeholders exactly how funds are used.',
   },
   {
     id: 3,
-    name: 'Aisha Williams',
-    role: 'Impact Investor',
+    name: 'Mrs. Bizuhan Getnet Gedamu',
+    role: 'Project Manager',
     content: 'The immersive experience on this platform transformed how I think about charitable giving. It\'s like I can reach out and touch the lives I\'m helping.',
   }
 ];
