@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import donationService, { DonationData } from '../../services/donationService';
 
 const donationAmounts = [25, 50, 100, 250, 500];
 
@@ -38,10 +38,7 @@ const DonationForm: React.FC = () => {
       setError('');
       
       try {
-        // Use environment variable or fallback to localhost
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        
-        const donationData = {
+        const donationData: DonationData = {
           name,
           email,
           amount,
@@ -52,7 +49,7 @@ const DonationForm: React.FC = () => {
         
         console.log('Submitting donation data:', donationData);
         
-        const response = await axios.post(`${API_URL}/api/donations`, donationData);
+        const response = await donationService.createDonation(donationData);
         
         console.log('Donation response:', response.data);
         

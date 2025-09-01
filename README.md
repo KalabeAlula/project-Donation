@@ -1,6 +1,6 @@
 # Donation Website with Chapa Payment Integration
 
-This project is a donation website for Glory Integrated Development Foundation with Chapa payment integration. It allows users to make donations using Chapa payment gateway or bank transfer. The backend has been enhanced with production-ready features for robust deployment.
+This project is a donation website for Glory Integrated Development Foundation with Chapa payment integration. It allows users to make donations using Chapa payment gateway or bank transfer. The backend has been enhanced with production-ready features for robust deployment. The project is now configured for deployment on Vercel.
 
 ## Features
 
@@ -48,6 +48,63 @@ cd backend
 npm install
 
 # Install frontend dependencies
+cd ..
+npm install
+```
+
+## Deployment to Vercel
+
+This project is configured for deployment to Vercel. We've provided several tools to help with the deployment process:
+
+### Automated Deployment
+
+1. Run the deployment preparation script:
+
+```bash
+npm run deploy:prepare
+```
+
+This script will check for the necessary configuration files and guide you through the deployment process.
+
+2. Deploy the backend first:
+
+```bash
+cd backend
+npm run deploy
+```
+
+3. After the backend is deployed, update the `.env.production` file with your backend URL:
+
+```
+VITE_API_URL=https://your-backend-url.vercel.app/api
+```
+
+4. Deploy the frontend:
+
+```bash
+cd ..
+npm run deploy
+```
+
+5. Verify your deployment:
+
+```bash
+npm run deploy:verify
+```
+
+### GitHub Actions Workflow
+
+We've also included a GitHub Actions workflow that will automatically deploy your application to Vercel when you push to the main branch. To use this workflow, you'll need to add the following secrets to your GitHub repository:
+
+- `VERCEL_TOKEN` - Your Vercel API token
+- `VERCEL_ORG_ID` - Your Vercel organization ID
+- `VERCEL_BACKEND_PROJECT_ID` - Your Vercel backend project ID
+- `VERCEL_FRONTEND_PROJECT_ID` - Your Vercel frontend project ID
+- `BACKEND_URL` - Your backend URL (after deployment)
+
+### Manual Deployment
+
+For detailed instructions on manually deploying the application to Vercel, please refer to the [DEPLOYMENT.md](./DEPLOYMENT.md) file.
 cd ../
 npm install
 ```

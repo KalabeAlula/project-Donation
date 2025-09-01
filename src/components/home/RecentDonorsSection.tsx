@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
-import axios from 'axios';
+import donationService from '../../services/donationService';
 
 import './recentDonorsSection.css'
 
@@ -159,14 +159,12 @@ const RecentDonorsSection: React.FC = () => {
   const fetchDonors = async () => {
     try {
       setLoading(true);
-      // Use environment variable or fallback to localhost
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      const response = await axios.get(`${API_URL}/api/donations`);
+      const response = await donationService.getDonations();
       
-      if (response.data.success) {
+      if (response.success) {
         // Filter for completed donations only
-        const completedDonations = response.data.data
+        const completedDonations = response.data
           .filter((donor: any) => donor.paymentStatus === 'completed')
           .map(transformDonorData);
         

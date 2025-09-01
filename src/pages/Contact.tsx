@@ -4,7 +4,7 @@ import { Mail, MapPin, Phone, Send } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import MapWrapper from '../components/map/MapWrapper';
-import axios from 'axios';
+import messageService, { MessageData } from '../services/messageService';
 
 
 const Contact: React.FC = () => {
@@ -35,9 +35,7 @@ const Contact: React.FC = () => {
     setSubmitStatus({});
     
     try {
-      // Use environment variable or fallback to localhost
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await axios.post(`${API_URL}/api/messages/contact`, formData);
+      const response = await messageService.sendContactMessage(formData as MessageData);
       
       setSubmitStatus({
         success: true,

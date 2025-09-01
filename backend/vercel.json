@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "MONGO_URI": "@mongo_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "JWT_EXPIRES_IN": "1d",
+    "CORS_ORIGIN": "https://gidf.org.et",
+    "CHAPA_SECRET_KEY": "@chapa_secret_key",
+    "CHAPA_CALLBACK_URL": "https://api.gidf.org.et/api/donations/verify-chapa",
+    "CHAPA_RETURN_URL": "https://gidf.org.et/donation-success",
+    "EMAIL_USER": "@email_user",
+    "EMAIL_PASS": "@email_pass",
+    "ADMIN_EMAIL": "@admin_email",
+    "BACKEND_URL": "https://api.gidf.org.et",
+    "FRONTEND_URL": "https://gidf.org.et"
+  }
+}
