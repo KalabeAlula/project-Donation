@@ -4,27 +4,27 @@ import { motion } from 'framer-motion';
 const supporters = [
   {
     name: 'TechCorp Global',
-    logo: '/public/Glory.jpg',
+    logo: '/Glory.jpg',
     
   },
   {
     name: 'GreenEarth Industries',
-    logo: '/public/Daftech.jpg',
+    logo: '/Daftech.jpg',
     
   },
   {
     name: 'Future Finance',
-    logo: '/public/Glory.jpg',
+    logo: '/Glory.jpg',
     
   },
   {
     name: 'HealthPlus Corp',
-    logo: '/public/Daftech.jpg',
+    logo: '/Daftech.jpg',
     
   },
   {
     name: 'EduTech Solutions',
-    logo: '/public/Glory.jpg',
+    logo: '/Glory.jpg',
     
   }
 ];

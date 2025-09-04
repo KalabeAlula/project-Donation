@@ -1,6 +1,6 @@
 # Vercel Deployment Guide
 
-This guide provides step-by-step instructions for deploying the MERN stack application to Vercel.
+This guide provides step-by-step instructions for deploying the MERN stack application to Vercel. This guide includes configuration for environment variables, deployment steps, and logging setup.
 
 ## Prerequisites
 
@@ -48,6 +48,26 @@ CORS_ORIGIN=https://gidf.org.et
 # Security Settings
 RATE_LIMIT_WINDOW_MS=15
 RATE_LIMIT_MAX=100
+```
+
+### 4. Logging Configuration for Serverless Environments
+
+When deploying to Vercel or other serverless environments, be aware of the following logging considerations:
+
+1. **File-based logging is disabled automatically** in serverless environments as they don't support persistent file writing.
+
+2. **Console logging is still active** and will be captured by the Vercel logging system.
+
+3. **No action required** - The application has been configured to detect serverless environments (like Vercel) and will automatically adjust the logging configuration.
+
+4. **Viewing logs** - You can view logs in the Vercel dashboard under the "Logs" tab of your deployment.
+
+5. **Known Issues Fixed** - The application has been updated to handle two common Vercel deployment issues:
+   - File-based logging is automatically disabled in serverless environments
+   - The logs directory creation is skipped in serverless environments
+
+```
+# JWT Settings
 JWT_SECRET=your_jwt_secret_here
 JWT_EXPIRES_IN=1d
 ```

@@ -34,8 +34,8 @@ exports.createPayment = async (req, res) => {
       email: email,
       first_name: name,
       tx_ref: tx_ref,
-      callback_url: process.env.CHAPA_CALLBACK_URL || 'http://localhost:3000/payment/callback',
-      return_url: process.env.CHAPA_RETURN_URL || 'http://localhost:3000/payment/success',
+      callback_url: process.env.CHAPA_CALLBACK_URL || 'https://donation-tan.vercel.app/api/donations/verify-chapa',
+      return_url: process.env.CHAPA_RETURN_URL || `${process.env.FRONTEND_URL || "https://gidf.org.et"}/donation-success?tx_ref=${tx_ref}`,
       customization: {
         title: 'Donation Payment',
         description: 'Donation to Foundation',

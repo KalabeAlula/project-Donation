@@ -3,12 +3,17 @@
  * This script helps prepare the project for deployment to Vercel
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 // Ensure we're in the project root
 const projectRoot = process.cwd();
+
+// For ES modules, we need to construct the __dirname equivalent
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Colors for console output
 const colors = {

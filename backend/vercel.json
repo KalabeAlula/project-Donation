@@ -14,17 +14,14 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "MONGO_URI": "@mongo_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "JWT_EXPIRES_IN": "1d",
-    "CORS_ORIGIN": "https://gidf.org.et",
-    "CHAPA_SECRET_KEY": "@chapa_secret_key",
+    "MONGO_URI": "mongodb+srv://jake40jones:Fc387DAoNEJ406y7@cluster0.zkydw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+    "CORS_ORIGIN": "https://frontenddonation.vercel.app",
+    "CHAPA_SECRET_KEY": "CHASECK_TEST-54rl8QcOLvV0DkkG2W682risyY8vHBAA",
     "CHAPA_CALLBACK_URL": "https://api.gidf.org.et/api/donations/verify-chapa",
-    "CHAPA_RETURN_URL": "https://gidf.org.et/donation-success",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASS": "@email_pass",
-    "ADMIN_EMAIL": "@admin_email",
-    "BACKEND_URL": "https://api.gidf.org.et",
-    "FRONTEND_URL": "https://gidf.org.et"
+    "CHAPA_RETURN_URL": "",
+    "EMAIL_USER": "kaleab2.0alu@gmail.com",
+    "EMAIL_PASS": "dhsh gamz grjc pivz",
+    "BACKEND_URL": "https://donation-tan.vercel.app",
+    "FRONTEND_URL": "https://frontenddonation.vercel.app"
   }
 }

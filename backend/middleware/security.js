@@ -83,7 +83,14 @@ const applySecurityMiddleware = (app) => {
           scriptSrc: ["'self'", 'https://trusted-cdn.com'],
           styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", `${config.urls.frontend}`],
+          connectSrc: [
+            "'self'", 
+            'https://gidf.org.et',
+            'https://frontenddonation-6wkgjxvwz-kaleab-alulas-projects.vercel.app',
+            `${config.urls.frontend}`,
+            ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+            ...(process.env.ENABLE_PREVIEW_CORS === 'true' ? ['*'] : []),
+          ],
         },
       })
     );

@@ -37,34 +37,59 @@ const DonationForm: React.FC = () => {
       setIsSubmitting(true);
       setError('');
       
+      const donationData: DonationData = {
+        name,
+        email,
+        amount,
+        paymentType,
+        paymentMethod: paymentMethod === 'credit_card' ? 'chapa' : paymentMethod, // Ensure 'credit_card' is sent as 'chapa'
+        isCompany: false
+      };
+      
+      console.log('Submitting donation data:', donationData);
+      
       try {
-        const donationData: DonationData = {
-          name,
-          email,
-          amount,
-          paymentType,
-          paymentMethod: paymentMethod === 'credit_card' ? 'chapa' : paymentMethod, // Ensure 'credit_card' is sent as 'chapa'
-          isCompany: false
-        };
-        
-        console.log('Submitting donation data:', donationData);
-        
         const response = await donationService.createDonation(donationData);
+        console.log('Full donation response:', response);
+        console.log('Raw checkout_url:', response.data?.checkout_url);
         
-        console.log('Donation response:', response.data);
-        
-        if (response.data.success) {
+        if (response.data?.checkout_url) {
+          // Clean the checkout_url to remove any extra characters
+          const cleanCheckoutUrl = response.data.checkout_url
+            .toString()
+            .replace(/[`\s]/g, '')
+            .trim();
+          
+          console.log('Cleaned checkout_url:', cleanCheckoutUrl);
+          setChapaCheckoutUrl(cleanCheckoutUrl);
+          setDonationData(response.data);
+          
+          // Try multiple redirect methods to handle browser security
+          try {
+            // Method 1: Direct redirect
+            window.location.href = cleanCheckoutUrl;
+          } catch (redirectError) {
+            console.error('Direct redirect failed:', redirectError);
+            try {
+              // Method 2: Open in new tab
+              window.open(cleanCheckoutUrl, '_blank');
+            } catch (tabError) {
+              console.error('New tab failed:', tabError);
+              // Method 3: Show manual redirect link
+              setError(`Redirect failed. Please click this link to complete payment: ${cleanCheckoutUrl}`);
+            }
+          }
+        } else if (response.data.success) {
           console.log('Payment method:', paymentMethod);
           console.log('Checkout URL exists:', !!response.data.data.checkout_url);
           
           if (paymentMethod === 'credit_card' && response.data.data.checkout_url) {
-            // For Chapa payments, store the checkout URL and redirect
-            console.log('Redirecting to Chapa checkout:', response.data.data.checkout_url);
-            setChapaCheckoutUrl(response.data.data.checkout_url);
-            setDonationData(response.data.data.donor);
+            // For Chapa payments, redirect to checkout URL
+            const cleanCheckoutUrl = response.data.data.checkout_url.trim();
+            console.log('Redirecting to Chapa checkout:', cleanCheckoutUrl);
             
-            // Redirect to Arifpay checkout page
-            window.location.href = response.data.data.checkout_url;
+            // Use window.location.replace for better redirect handling
+            window.location.replace(cleanCheckoutUrl);
             return; // Exit early to prevent showing completion screen
           } else {
             // For other payment methods, show completion screen

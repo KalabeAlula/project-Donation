@@ -97,8 +97,8 @@ exports.createDonation = asyncHandler(async (req, res) => {
         return_url:
           process.env.CHAPA_RETURN_URL ||
           `${
-            process.env.FRONTEND_URL || "http://localhost:5174"
-          }/donation-success`,
+            process.env.FRONTEND_URL || "https://gidf.org.et"
+          }/donation-success?tx_ref=${tx_ref}`,
         customization: {
           title: "Glory Donation", // Shortened to be under 16 characters
           description: `${
@@ -146,7 +146,7 @@ exports.createDonation = asyncHandler(async (req, res) => {
             message: "Donation initialized. Please complete payment.",
             data: {
               donor,
-              checkout_url: chapaResponse.data.checkout_url,
+              checkout_url: chapaResponse.data.checkout_url.trim(),
             },
           });
         } else {
@@ -326,8 +326,8 @@ exports.verifyChapa = async (req, res) => {
       if (req.query.redirect === "true") {
         return res.redirect(
           `${
-            process.env.FRONTEND_URL || "http://localhost:5174"
-          }/donation-success?status=${status}&transaction_id=${transaction_id}`
+            process.env.FRONTEND_URL || "https://gidf.org.et"
+          }/donation-success?status=${status}&transaction_id=${transaction_id}&tx_ref=${tx_ref}`
         );
       }
 
@@ -412,17 +412,28 @@ exports.verifyPayment = async (req, res) => {
 // @access  Private (would require auth in a real app)
 exports.getDonations = async (req, res) => {
   try {
-    // Check if tx_ref query parameter is provided
-    const { tx_ref } = req.query;
+    // Check for query parameters
+    const { tx_ref, transactionId, transaction_id } = req.query;
 
+    // Build query based on provided parameters
+    let query = {};
+    
     if (tx_ref) {
-      // If tx_ref is provided, find donation by tx_ref
-      const donation = await Donor.find({ tx_ref });
+      query.tx_ref = tx_ref;
+    } else if (transactionId) {
+      query.transactionId = transactionId;
+    } else if (transaction_id) {
+      query.transactionId = transaction_id;
+    }
+
+    if (Object.keys(query).length > 0) {
+      // If specific query parameters are provided, find matching donations
+      const donations = await Donor.find(query);
 
       return res.status(200).json({
         success: true,
-        count: donation.length,
-        data: donation,
+        count: donations.length,
+        data: donations,
       });
     }
 

@@ -3,7 +3,7 @@
  * Centralizes all configuration variables based on environment
  */
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || "development";
 
 // Base configuration shared across all environments
 const baseConfig = {
@@ -12,7 +12,7 @@ const baseConfig = {
     env,
   },
   mongo: {
-    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/donation-website',
+    uri: process.env.MONGO_URI || "mongodb://localhost:27017/donation-website",
     options: {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
@@ -31,12 +31,16 @@ const baseConfig = {
     },
   },
   urls: {
-    backend: process.env.BACKEND_URL || 'http://localhost:5000',
-    frontend: process.env.FRONTEND_URL || 'http://localhost:5174',
+    backend: process.env.BACKEND_URL || "http://localhost:5000",
+    frontend: process.env.FRONTEND_URL || "http://localhost:5174",
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
+    maxAge: 86400, // 24 hours in seconds
   },
 };
 
@@ -50,7 +54,18 @@ const envConfigs = {
       ...baseConfig.mongo,
       // Add development-specific MongoDB options if needed
     },
-    // Add other development-specific configurations
+    cors: {
+      ...baseConfig.cors,
+      // Allow all origins in development for easier testing
+      origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://frontenddonation-6wkgjxvwz-kaleab-alulas-projects.vercel.app',
+        'https://frontenddonation-gh41eones-kaleab-alulas-projects.vercel.app',
+        process.env.FRONTEND_URL,
+        ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+      ],
+    },
   },
   test: {
     app: {
@@ -61,7 +76,11 @@ const envConfigs = {
       ...baseConfig.mongo,
       uri: process.env.TEST_MONGO_URI || 'mongodb://localhost:27017/donation-website-test',
     },
-    // Add other test-specific configurations
+    cors: {
+      ...baseConfig.cors,
+      // Allow all origins in test environment
+      origin: '*',
+    },
   },
   production: {
     app: {
@@ -82,7 +101,29 @@ const envConfigs = {
     cors: {
       ...baseConfig.cors,
       // In production, restrict CORS to specific origins
-      origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL,
+      origin: (origin, callback) => {
+        const allowedOrigins = [
+          'https://gidf.org.et',                // Production domain
+          'https://www.gidf.org.et',            // Production domain with www
+          'https://frontenddonation.vercel.app', // Main frontend domain
+          'https://frontenddonation-6wkgjxvwz-kaleab-alulas-projects.vercel.app', // Vercel frontend
+          'https://frontenddonation-gh41eones-kaleab-alulas-projects.vercel.app',
+          process.env.FRONTEND_URL,            // From environment variable
+          ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []), // Additional allowed origin
+        ];
+
+        // Enable CORS for specific origins in production
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          // Check if preview mode is enabled for development/testing
+          if (process.env.ENABLE_PREVIEW_CORS === "true") {
+            callback(null, true);
+          } else {
+            callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+          }
+        }
+      },
     },
     // Add other production-specific configurations
   },
@@ -91,5 +132,5 @@ const envConfigs = {
 // Export the configuration for the current environment
 module.exports = {
   ...baseConfig,
-  ...envConfigs[env] || envConfigs.development,
+  ...(envConfigs[env] || envConfigs.development),
 };

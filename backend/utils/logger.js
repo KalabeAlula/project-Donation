@@ -32,8 +32,11 @@ transports.push(
   })
 );
 
-// In production, also log to file
-if (config.app.env === "production") {
+// In production, also log to file if not in a serverless environment (like Vercel)
+// Vercel and other serverless platforms don't support persistent file writing
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+if (config.app.env === "production" && !isServerless) {
   // Log errors to a separate file
   transports.push(
     new winston.transports.File({

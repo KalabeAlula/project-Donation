@@ -19,10 +19,21 @@ const { monitorDbConnection, monitorDbOperations } = require('./utils/dbMonitor'
 const { connectDB, closeConnection } = require('./utils/dbConnection');
 const setupSwagger = require('./swagger');
 
-// Create logs directory if it doesn't exist
-const logsDir = path.join(__dirname, 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir);
+// Create logs directory if it doesn't exist and not in a serverless environment
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+// Skip directory creation in serverless environments like Vercel
+if (!isServerless) {
+  const logsDir = path.join(__dirname, 'logs');
+  if (!fs.existsSync(logsDir)) {
+    try {
+      fs.mkdirSync(logsDir);
+      logger.info('Created logs directory');
+    } catch (error) {
+      logger.warn(`Unable to create logs directory: ${error.message}`);
+      // Continue execution even if directory creation fails
+    }
+  }
 }
 
 const app = express();
@@ -55,6 +66,10 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/health', healthRoutes);
+
+// Handle favicon requests
+app.get('/favicon.ico', (req, res) => res.status(204).send());
+app.get('/favicon.png', (req, res) => res.status(204).send());
 
 // Handle 404 errors for routes that don't exist
 app.use(notFound);

@@ -34,7 +34,13 @@ const initializePayment = async (paymentData) => {
     );
     
     console.log('Chapa API response status:', response.status);
-    console.log('Chapa API response data:', response.data);
+    console.log('Chapa API response data:', JSON.stringify(response.data, null, 2));
+    
+    // Ensure checkout_url is a clean string
+    if (response.data && response.data.data && response.data.data.checkout_url) {
+      response.data.data.checkout_url = response.data.data.checkout_url.trim();
+      console.log('Cleaned checkout_url:', response.data.data.checkout_url);
+    }
     
     return response.data;
   } catch (error) {
