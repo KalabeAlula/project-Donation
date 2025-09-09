@@ -42,9 +42,15 @@ const donationService = {
     return response.data;
   },
 
-  // Verify payment
+  // Verify payment by transaction reference (legacy)
   verifyPayment: async (txRef: string) => {
     const response = await api.get(`/api/donations/verify/${txRef}`);
+    return response.data;
+  },
+
+  // Verify payment by sessionId (ArifPay)
+  verifyPaymentBySessionId: async (sessionId: string) => {
+    const response = await api.get(`/api/donations?sessionId=${sessionId}`);
     return response.data;
   },
 };

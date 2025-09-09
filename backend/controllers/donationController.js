@@ -1,7 +1,7 @@
 const Donor = require("../models/Donor");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
-const chapaUtils = require("../utils/chapaUtils");
+const arifpayUtils = require("../utils/arifpayUtils");
 const AppError = require("../utils/AppError");
 const asyncHandler = require("../middleware/asyncHandler");
 const logger = require("../utils/logger");
@@ -67,10 +67,10 @@ exports.createDonation = asyncHandler(async (req, res) => {
     }
 
     // Handle different payment methods
-    if (paymentMethod === "credit_card" || paymentMethod === "chapa") {
-      console.log("Processing Chapa payment...");
+    if (paymentMethod === "credit_card" || paymentMethod === "arifpay") {
+      console.log("Processing ArifPay payment...");
       // Generate a unique transaction reference
-      const tx_ref = chapaUtils.generateTransactionReference();
+      const sessionId = arifpayUtils.generateTransactionReference();
 
       // Validate email format
       const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -81,48 +81,42 @@ exports.createDonation = asyncHandler(async (req, res) => {
         });
       }
 
-      // Prepare Chapa payment payload
-      const chapaPayload = {
-        amount: amount,
-        currency: "ETB",
-        email: email,
-        first_name: name.split(" ")[0],
-        last_name: name.split(" ").slice(1).join(" ") || name.split(" ")[0],
-        tx_ref: tx_ref,
-        callback_url:
-          process.env.CHAPA_CALLBACK_URL ||
-          `${
-            process.env.BACKEND_URL || "http://localhost:5000"
-          }/api/donations/verify-chapa`,
-        return_url:
-          process.env.CHAPA_RETURN_URL ||
-          `${
-            process.env.FRONTEND_URL || "https://gidf.org.et"
-          }/donation-success?tx_ref=${tx_ref}`,
-        customization: {
-          title: "Glory Donation", // Shortened to be under 16 characters
-          description: `${
-            paymentType === "monthly" ? "Monthly" : "One-time"
-          } donation of ${amount} ETB`,
-          logo: process.env.LOGO_URL || "",
-        },
+      // Prepare ArifPay payment payload
+      const arifpayPayload = {
+        cancelUrl: `${process.env.FRONTEND_URL || "https://gidf.org.et"}/donation-success`,
+        successUrl: `${process.env.FRONTEND_URL || "https://gidf.org.et"}/donation-success?sessionId=${sessionId}`,
+        errorUrl: `${process.env.FRONTEND_URL || "https://gidf.org.et"}/donation-success`,
+        notifyUrl: `${process.env.BACKEND_URL || "http://localhost:5000"}/api/donations/verify-arifpay`,
+        paymentMethods: ["CARD"],
+        items: [{
+          name: "Glory Donation",
+          quantity: 1,
+          price: Number(amount),
+          description: `${paymentType === "monthly" ? "Monthly" : "One-time"} donation of ${amount} ETB`
+        }],
+        beneficiaries: [{
+          accountNumber: "123456789",
+          bank: "ABYSSINIA",
+          amount: Number(amount)
+        }],
+        expiresIn: 3600
       };
 
-      logger.info("Chapa payload:", chapaPayload);
+      logger.info("ArifPay payload:", arifpayPayload);
       logger.info(
-        "Using Chapa secret key:",
-        process.env.CHAPA_SECRET_KEY ? "Key exists" : "Key missing"
+        "Using ArifPay API key:",
+        process.env.ARIFPAY_API_KEY ? "Key exists" : "Key missing"
       );
 
       try {
-        // Call Chapa API to initialize payment using chapaUtils
-        logger.info("Calling Chapa API...");
-        const chapaResponse = await chapaUtils.initializePayment(chapaPayload);
+        // Call ArifPay API to initialize payment using arifpayUtils
+        logger.info("Calling ArifPay API...");
+        const arifpayResponse = await arifpayUtils.initializePayment(arifpayPayload);
 
-        logger.info("Chapa API response:", chapaResponse);
+        logger.info("ArifPay API response:", arifpayResponse);
 
-        if (chapaResponse && chapaResponse.status === "success") {
-          // Create new donor with Chapa payment information
+        if (arifpayResponse && arifpayResponse.sessionId) {
+          // Create new donor with ArifPay payment information
           const donor = await Donor.create({
             name,
             email,
@@ -130,15 +124,15 @@ exports.createDonation = asyncHandler(async (req, res) => {
             paymentType,
             isCompany: isCompany || false,
             companyName: companyName || "",
-            paymentMethod: "chapa",
+            paymentMethod: "arifpay",
             paymentStatus: "pending",
-            tx_ref: tx_ref,
-            chapa_checkout_url: chapaResponse.data.checkout_url,
+            sessionId: sessionId,
+            arifpay_checkout_url: arifpayResponse.paymentUrl,
           });
 
           logger.info(
-            "Donor created successfully with Chapa checkout URL:",
-            chapaResponse.data.checkout_url
+            "Donor created successfully with ArifPay checkout URL:",
+            arifpayResponse.paymentUrl
           );
 
           res.status(201).json({
@@ -146,19 +140,19 @@ exports.createDonation = asyncHandler(async (req, res) => {
             message: "Donation initialized. Please complete payment.",
             data: {
               donor,
-              checkout_url: chapaResponse.data.checkout_url.trim(),
+              checkout_url: arifpayResponse.paymentUrl.trim(),
             },
           });
         } else {
-          logger.error("Chapa initialization failed:", chapaResponse);
+          logger.error("ArifPay initialization failed:", arifpayResponse);
           res.status(400).json({
             success: false,
-            message: "Failed to initialize payment with Chapa.",
-            error: chapaResponse,
+            message: "Failed to initialize payment with ArifPay.",
+            error: arifpayResponse,
           });
         }
       } catch (error) {
-        logger.error("Chapa API Error:", {
+        logger.error("ArifPay API Error:", {
           error: error.message,
           stack: error.stack,
         });
@@ -246,17 +240,17 @@ exports.createDonation = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Verify Chapa payment callback
-// @route   POST /api/donations/verify-chapa
+// @desc    Verify ArifPay payment callback
+// @route   POST /api/donations/verify-arifpay
 // @access  Public
-exports.verifyChapa = async (req, res) => {
+exports.verifyArifpay = async (req, res) => {
   try {
-    const { tx_ref, status, transaction_id } = req.body;
+    const { sessionId, status } = req.body;
 
-    logger.info("Received Chapa webhook:", req.body);
+    logger.info("Received ArifPay webhook:", req.body);
 
-    // Find the donation by tx_ref
-    const donation = await Donor.findOne({ tx_ref });
+    // Find the donation by sessionId
+    const donation = await Donor.findOne({ sessionId });
 
     if (!donation) {
       return res.status(404).json({
@@ -265,23 +259,21 @@ exports.verifyChapa = async (req, res) => {
       });
     }
 
-    // Verify the payment status with Chapa API
+    // Verify the payment status with ArifPay API
     try {
-      const verificationResult = await chapaUtils.verifyPayment(tx_ref);
-      logger.info("Chapa verification result:", verificationResult);
+      const verificationResult = await arifpayUtils.verifyPayment(sessionId);
+      logger.info("ArifPay verification result:", verificationResult);
 
-      // Update payment status based on Chapa verification
+      // Update payment status based on ArifPay verification
       donation.paymentStatus =
-        verificationResult.status === "success" ? "completed" : "failed";
+        verificationResult.status === "PAID" ? "completed" : "failed";
       donation.transactionId =
-        transaction_id ||
-        verificationResult.data.transaction_id ||
-        donation.transactionId;
+        verificationResult.transactionId || donation.transactionId;
 
       await donation.save();
 
       // If payment was successful, send thank you email
-      if (verificationResult.status === "success") {
+      if (verificationResult.status === "PAID") {
         try {
           await sendThankYouEmail(donation);
         } catch (emailErr) {
@@ -299,19 +291,19 @@ exports.verifyChapa = async (req, res) => {
         data: donation,
       });
     } catch (verifyError) {
-      logger.error("Error verifying payment with Chapa API:", {
+      logger.error("Error verifying payment with ArifPay API:", {
         error: verifyError.message,
-        tx_ref,
+        sessionId,
       });
 
       // Update based on webhook data if API verification fails
-      donation.paymentStatus = status === "success" ? "completed" : "failed";
-      donation.transactionId = transaction_id || donation.transactionId;
+      donation.paymentStatus = status === "PAID" ? "completed" : "failed";
+      donation.transactionId = donation.transactionId;
 
       await donation.save();
 
       // If payment was successful based on webhook, send thank you email
-      if (status === "success") {
+      if (status === "PAID") {
         try {
           await sendThankYouEmail(donation);
         } catch (emailErr) {
@@ -327,7 +319,7 @@ exports.verifyChapa = async (req, res) => {
         return res.redirect(
           `${
             process.env.FRONTEND_URL || "https://gidf.org.et"
-          }/donation-success?status=${status}&transaction_id=${transaction_id}&tx_ref=${tx_ref}`
+          }/donation-success?status=${status}&sessionId=${sessionId}`
         );
       }
 
@@ -338,7 +330,7 @@ exports.verifyChapa = async (req, res) => {
       });
     }
   } catch (error) {
-    logger.error("Error processing Chapa webhook:", {
+    logger.error("Error processing ArifPay webhook:", {
       error: error.message,
       stack: error.stack,
     });
@@ -413,12 +405,14 @@ exports.verifyPayment = async (req, res) => {
 exports.getDonations = async (req, res) => {
   try {
     // Check for query parameters
-    const { tx_ref, transactionId, transaction_id } = req.query;
+    const { sessionId, tx_ref, transactionId, transaction_id } = req.query;
 
     // Build query based on provided parameters
     let query = {};
     
-    if (tx_ref) {
+    if (sessionId) {
+      query.sessionId = sessionId;
+    } else if (tx_ref) {
       query.tx_ref = tx_ref;
     } else if (transactionId) {
       query.transactionId = transactionId;

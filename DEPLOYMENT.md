@@ -33,14 +33,14 @@ EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 ADMIN_EMAIL=admin@example.com
 
-# Chapa Payment Gateway
-CHAPA_SECRET_KEY=your_chapa_secret_key
+# ArifPay Payment Gateway
+ARIFPAY_SECRET_KEY=your_arifpay_secret_key
 
 # URLs
 BACKEND_URL=https://api.gidf.org.et
 FRONTEND_URL=https://gidf.org.et
-CHAPA_CALLBACK_URL=https://api.gidf.org.et/api/donations/verify-chapa
-CHAPA_RETURN_URL=https://gidf.org.et/donation-success
+ARIFPAY_CALLBACK_URL=https://api.gidf.org.et/api/donations/verify-arifpay
+ARIFPAY_RETURN_URL=https://gidf.org.et/donation-success
 
 # CORS Settings
 CORS_ORIGIN=https://gidf.org.et
@@ -126,7 +126,7 @@ VITE_API_URL=https://api.gidf.org.et/api
    - Navigate to Settings > Environment Variables
    - Update `FRONTEND_URL` with your frontend domain (https://gidf.org.et)
    - Update `CORS_ORIGIN` with your frontend domain (https://gidf.org.et)
-   - Update `CHAPA_RETURN_URL` with your frontend domain + `/donation-success` (https://gidf.org.et/donation-success)
+   - Update `ARIFPAY_RETURN_URL` with your frontend domain + `/donation-success` (https://gidf.org.et/donation-success)
 
 2. Redeploy the backend to apply the changes:
    ```bash

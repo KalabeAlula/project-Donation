@@ -15,7 +15,7 @@ const DonationForm: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>('credit_card');
   const [showBankDetails, setShowBankDetails] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [chapaCheckoutUrl, setChapaCheckoutUrl] = useState<string>('');
+  const [arifpayCheckoutUrl, setArifpayCheckoutUrl] = useState<string>('');
   const [donationData, setDonationData] = useState<any>(null);
   
   const handleAmountClick = (value: number) => {
@@ -42,7 +42,7 @@ const DonationForm: React.FC = () => {
         email,
         amount,
         paymentType,
-        paymentMethod: paymentMethod === 'credit_card' ? 'chapa' : paymentMethod, // Ensure 'credit_card' is sent as 'chapa'
+        paymentMethod: paymentMethod === 'credit_card' ? 'arifpay' : paymentMethod, // Ensure 'credit_card' is sent as 'arifpay'
         isCompany: false
       };
       
@@ -61,7 +61,7 @@ const DonationForm: React.FC = () => {
             .trim();
           
           console.log('Cleaned checkout_url:', cleanCheckoutUrl);
-          setChapaCheckoutUrl(cleanCheckoutUrl);
+          setArifpayCheckoutUrl(cleanCheckoutUrl);
           setDonationData(response.data);
           
           // Try multiple redirect methods to handle browser security
@@ -84,16 +84,16 @@ const DonationForm: React.FC = () => {
           console.log('Checkout URL exists:', !!response.data.data.checkout_url);
           
           if (paymentMethod === 'credit_card' && response.data.data.checkout_url) {
-            // For Chapa payments, redirect to checkout URL
+            // For ArifPay payments, redirect to checkout URL
             const cleanCheckoutUrl = response.data.data.checkout_url.trim();
-            console.log('Redirecting to Chapa checkout:', cleanCheckoutUrl);
+            console.log('Redirecting to ArifPay checkout:', cleanCheckoutUrl);
             
             // Use window.location.replace for better redirect handling
             window.location.replace(cleanCheckoutUrl);
             return; // Exit early to prevent showing completion screen
           } else {
             // For other payment methods, show completion screen
-            console.log('Showing completion screen for non-Chapa payment');
+            console.log('Showing completion screen for non-ArifPay payment');
             setDonationData(response.data.data);
             setIsDonationComplete(true);
           }
@@ -117,7 +117,7 @@ const DonationForm: React.FC = () => {
     setPaymentMethod('credit_card');
     setShowBankDetails(false);
     setIsDonationComplete(false);
-    setChapaCheckoutUrl('');
+    setArifpayCheckoutUrl('');
     setDonationData(null);
     setError('');
   };
@@ -239,7 +239,7 @@ const DonationForm: React.FC = () => {
                         setShowBankDetails(false);
                       }}
                     >
-                      Chapa
+                      ArifPay
                     </motion.button>
                     <motion.button
                       type="button"

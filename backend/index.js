@@ -8,6 +8,8 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const donationRoutes = require('./routes/donationRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const apiManagementRoutes = require('./routes/apiManagementRoutes');
+const CronService = require('./services/cronService');
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 const config = require('./config/config');
@@ -66,6 +68,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api', apiManagementRoutes);
 
 // Handle favicon requests
 app.get('/favicon.ico', (req, res) => res.status(204).send());
@@ -91,6 +94,12 @@ connectDB()
       if (config.app.env === 'production') {
         startResourceMonitoring();
         logger.info('Resource monitoring started');
+      }
+      
+      // Initialize cron service for API management
+      if (config.app.env !== 'test') {
+        CronService.startAllJobs();
+        logger.info('Cron service initialized for API management');
       }
     });
   })

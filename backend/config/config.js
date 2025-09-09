@@ -24,11 +24,11 @@ const baseConfig = {
     adminEmail: process.env.ADMIN_EMAIL,
   },
   payment: {
-    chapa: {
-      secretKey: process.env.CHAPA_SECRET_KEY,
-      callbackUrl: process.env.CHAPA_CALLBACK_URL,
-      returnUrl: process.env.CHAPA_RETURN_URL,
-    },
+    arifpay: {
+    secretKey: process.env.ARIFPAY_SECRET_KEY,
+    callbackUrl: process.env.ARIFPAY_CALLBACK_URL,
+    returnUrl: process.env.ARIFPAY_RETURN_URL,
+  },
   },
   urls: {
     backend: process.env.BACKEND_URL || "http://localhost:5000",

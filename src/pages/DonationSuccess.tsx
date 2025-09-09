@@ -15,12 +15,11 @@ const DonationSuccess: React.FC = () => {
       try {
         // Get query parameters
         const params = new URLSearchParams(location.search);
-        const txRef = params.get('tx_ref');
-        const transactionId = params.get('transaction_id');
+        const sessionId = params.get('sessionId');
         const status = params.get('status');
         
-        if (!txRef && !transactionId) {
-          setError('Missing transaction ID');
+        if (!sessionId) {
+          setError('Missing session ID');
           setLoading(false);
           return;
         }
@@ -28,56 +27,29 @@ const DonationSuccess: React.FC = () => {
         // Use environment variable or fallback to localhost
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         
-        // Try multiple approaches to find the donation
+        // Try to find the donation by sessionId
         let donationData = null;
         
-        // 1. Try tx_ref first
-        if (txRef) {
+        // 1. Try sessionId first
+        if (sessionId) {
           try {
-            const txRefResponse = await axios.get(`${API_URL}/api/donations?tx_ref=${txRef}`);
-            if (txRefResponse.data.success && txRefResponse.data.data.length > 0) {
-              donationData = txRefResponse.data.data[0];
+            const sessionResponse = await axios.get(`${API_URL}/api/donations?sessionId=${sessionId}`);
+            if (sessionResponse.data.success && sessionResponse.data.data.length > 0) {
+              donationData = sessionResponse.data.data[0];
             }
           } catch (error) {
-            console.log('tx_ref query failed, trying transaction_id...');
+            console.log('sessionId query failed, trying all donations...');
           }
         }
         
-        // 2. Try transaction_id if tx_ref didn't work
-        if (!donationData && transactionId) {
-          try {
-            const txIdResponse = await axios.get(`${API_URL}/api/donations?transactionId=${transactionId}`);
-            if (txIdResponse.data.success && txIdResponse.data.data.length > 0) {
-              donationData = txIdResponse.data.data[0];
-            }
-          } catch (error) {
-            console.log('transaction_id query failed, trying all donations...');
-          }
-        }
-        
-        // 3. Try to find by transaction_id as tx_ref fallback
-        if (!donationData && transactionId) {
-          try {
-            const fallbackResponse = await axios.get(`${API_URL}/api/donations?tx_ref=${transactionId}`);
-            if (fallbackResponse.data.success && fallbackResponse.data.data.length > 0) {
-              donationData = fallbackResponse.data.data[0];
-            }
-          } catch (error) {
-            console.log('Fallback query failed');
-          }
-        }
-        
-        // 4. If still not found, get all donations and search manually
-        if (!donationData && (txRef || transactionId)) {
+        // 2. If not found, get all donations and search manually
+        if (!donationData && sessionId) {
           try {
             const allResponse = await axios.get(`${API_URL}/api/donations`);
             if (allResponse.data.success && allResponse.data.data) {
-              const searchId = txRef || transactionId;
               donationData = allResponse.data.data.find((d: any) => 
-                d.tx_ref === searchId || 
-                d.transactionId === searchId ||
-                (d.transactionId && d.transactionId.includes(searchId)) ||
-                (d.tx_ref && d.tx_ref.includes(searchId))
+                d.sessionId === sessionId ||
+                (d.sessionId && d.sessionId.includes(sessionId))
               );
             }
           } catch (error) {

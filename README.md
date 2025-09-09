@@ -1,15 +1,15 @@
-# Donation Website with Chapa Payment Integration
+# Donation Website with ArifPay Payment Integration
 
-This project is a donation website for Glory Integrated Development Foundation with Chapa payment integration. It allows users to make donations using Chapa payment gateway or bank transfer. The backend has been enhanced with production-ready features for robust deployment. The project is now configured for deployment on Vercel.
+This project is a donation website for Glory Integrated Development Foundation with ArifPay payment integration. It allows users to make donations using ArifPay payment gateway or bank transfer. The backend has been enhanced with production-ready features for robust deployment. The project is now configured for deployment on Vercel.
 
 ## Features
 
 - Donation form with predefined and custom amounts
-- Multiple payment methods (Chapa and Bank Transfer)
+- Multiple payment methods (ArifPay and Bank Transfer)
 - One-time and monthly donation options
 - Email notifications for donors
 - Admin dashboard to view donations
-- Chapa payment gateway integration
+- ArifPay payment gateway integration
 - Bank transfer payment option
 
 ### Backend Enhancements
@@ -130,14 +130,14 @@ EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 ADMIN_EMAIL=admin@example.com
 
-# Chapa Payment Gateway
-CHAPA_SECRET_KEY=YOUR_CHAPA_SECRET_KEY
+# ArifPay Payment Gateway
+ARIFPAY_SECRET_KEY=YOUR_ARIFPAY_SECRET_KEY
 
 # URLs
 BACKEND_URL=http://localhost:5000
 FRONTEND_URL=http://localhost:3000
-CHAPA_CALLBACK_URL=http://localhost:5000/api/donations/verify-chapa
-CHAPA_RETURN_URL=http://localhost:3000/donation-success
+ARIFPAY_CALLBACK_URL=http://localhost:5000/api/donations/verify-arifpay
+ARIFPAY_RETURN_URL=http://localhost:3000/donation-success
 ```
 
 4. Start the development servers
@@ -194,21 +194,21 @@ To set up CI/CD, add the following secrets to your GitHub repository:
 - `DEPLOY_USER`: SSH username for deployment
 - `DEPLOY_KEY`: SSH private key for deployment
 
-## Chapa Payment Integration
+## ArifPay Payment Integration
 
 ### How it works
 
-1. User fills out the donation form and selects Chapa as the payment method
+1. User fills out the donation form and selects ArifPay as the payment method
 2. The frontend sends the donation data to the backend
-3. The backend initializes a payment with Chapa and returns a checkout URL
-4. The user is redirected to the Chapa checkout page
-5. After payment, Chapa redirects the user back to the donation success page
-6. The backend verifies the payment status with Chapa
+3. The backend initializes a payment with ArifPay and returns a checkout URL
+4. The user is redirected to the ArifPay checkout page
+5. After payment, ArifPay redirects the user back to the donation success page
+6. The backend verifies the payment status with ArifPay
 7. The donation status is updated in the database
 
-### Testing Chapa Payments
+### Testing ArifPay Payments
 
-For testing, you can use the following test card details provided by Chapa:
+For testing, you can use the following test card details provided by ArifPay:
 
 - Card Number: 4242424242424242
 - Expiry Date: Any future date
@@ -223,7 +223,7 @@ For testing, you can use the following test card details provided by Chapa:
 - `POST /api/donations` - Create a new donation
 - `GET /api/donations` - Get all donations (or filter by tx_ref)
 - `PUT /api/donations/:id/verify` - Verify payment status
-- `POST /api/donations/verify-chapa` - Verify Chapa payment callback
+- `POST /api/donations/verify-arifpay` - Verify ArifPay payment callback
 
 ### Messages
 

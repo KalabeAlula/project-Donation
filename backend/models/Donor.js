@@ -7,11 +7,11 @@ const donorSchema = new mongoose.Schema({
   paymentType: { type: String, enum: ['one-time', 'monthly'], required: true },
   isCompany: { type: Boolean, default: false },
   companyName: { type: String },
-  paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'bank_transfer', 'chapa'], required: true },
+  paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'bank_transfer', 'arifpay'], required: true },
   paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
   transactionId: { type: String },
   tx_ref: { type: String },
-  chapa_checkout_url: { type: String },
+  arifpay_checkout_url: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
