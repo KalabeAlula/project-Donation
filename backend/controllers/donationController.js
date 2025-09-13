@@ -1,38 +1,9 @@
 const Donor = require("../models/Donor");
 const axios = require("axios");
-const nodemailer = require("nodemailer");
-const chapaUtils = require("../utils/chapaUtils");
+const arifpayUtils = require("../utils/arifpayUtils");
 const AppError = require("../utils/AppError");
 const asyncHandler = require("../middleware/asyncHandler");
 const logger = require("../utils/logger");
-
-// Configure Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Send thank you email to donor
-async function sendThankYouEmail(donor) {
-  try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: donor.email,
-      subject: "Thank You for Your Donation!",
-      text: `Dear ${donor.name},\n\nThank you for your generous donation of $${donor.amount}.\n\nBest regards,\nGlory Integrated Development Foundation Team`,
-    };
-    await transporter.sendMail(mailOptions);
-    logger.info(`Thank you email sent to ${donor.email}`);
-  } catch (error) {
-    logger.error("Error sending thank you email:", {
-      error: error.message,
-      donorEmail: donor.email,
-    });
-  }
-}
 
 // @desc    Create a new donation
 // @route   POST /api/donations
@@ -67,10 +38,10 @@ exports.createDonation = asyncHandler(async (req, res) => {
     }
 
     // Handle different payment methods
-    if (paymentMethod === "credit_card" || paymentMethod === "chapa") {
-      console.log("Processing Chapa payment...");
+    if (paymentMethod === "credit_card" || paymentMethod === "arifpay") {
+      console.log("Processing AfriPay payment...");
       // Generate a unique transaction reference
-      const tx_ref = chapaUtils.generateTransactionReference();
+      const tx_ref = arifpayUtils.generateTransactionReference();
 
       // Validate email format
       const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -81,8 +52,8 @@ exports.createDonation = asyncHandler(async (req, res) => {
         });
       }
 
-      // Prepare Chapa payment payload
-      const chapaPayload = {
+      // Prepare AfriPay payment payload
+      const arifpayPayload = {
         amount: amount,
         currency: "ETB",
         email: email,
@@ -90,17 +61,17 @@ exports.createDonation = asyncHandler(async (req, res) => {
         last_name: name.split(" ").slice(1).join(" ") || name.split(" ")[0],
         tx_ref: tx_ref,
         callback_url:
-          process.env.CHAPA_CALLBACK_URL ||
+          process.env.ARIFPAY_CALLBACK_URL ||
           `${
             process.env.BACKEND_URL || "http://localhost:5000"
-          }/api/donations/verify-chapa`,
+          }/api/donations/verify-arifpay`,
         return_url:
-          process.env.CHAPA_RETURN_URL ||
+          process.env.ARIFPAY_RETURN_URL ||
           `${
             process.env.FRONTEND_URL || "https://gidf.org.et"
           }/donation-success?tx_ref=${tx_ref}`,
         customization: {
-          title: "Glory Donation", // Shortened to be under 16 characters
+          title: "Glory Donation",
           description: `${
             paymentType === "monthly" ? "Monthly" : "One-time"
           } donation of ${amount} ETB`,
@@ -108,21 +79,21 @@ exports.createDonation = asyncHandler(async (req, res) => {
         },
       };
 
-      logger.info("Chapa payload:", chapaPayload);
+      logger.info("AfriPay payload:", arifpayPayload);
       logger.info(
-        "Using Chapa secret key:",
-        process.env.CHAPA_SECRET_KEY ? "Key exists" : "Key missing"
+        "Using AfriPay secret key:",
+        process.env.ARIFPAY_SECRET_KEY ? "Key exists" : "Key missing"
       );
 
       try {
-        // Call Chapa API to initialize payment using chapaUtils
-        logger.info("Calling Chapa API...");
-        const chapaResponse = await chapaUtils.initializePayment(chapaPayload);
+        // Call AfriPay API to initialize payment using arifpayUtils
+        logger.info("Calling AfriPay API...");
+        const arifpayResponse = await arifpayUtils.initializePayment(arifpayPayload);
 
-        logger.info("Chapa API response:", chapaResponse);
+        logger.info("AfriPay API response:", arifpayResponse);
 
-        if (chapaResponse && chapaResponse.status === "success") {
-          // Create new donor with Chapa payment information
+        if (arifpayResponse && arifpayResponse.status === "success") {
+          // Create new donor with AfriPay payment information
           const donor = await Donor.create({
             name,
             email,
@@ -130,15 +101,15 @@ exports.createDonation = asyncHandler(async (req, res) => {
             paymentType,
             isCompany: isCompany || false,
             companyName: companyName || "",
-            paymentMethod: "chapa",
+            paymentMethod: "arifpay",
             paymentStatus: "pending",
             tx_ref: tx_ref,
-            chapa_checkout_url: chapaResponse.data.checkout_url,
+            checkout_url: arifpayResponse.data.checkout_url,
           });
 
           logger.info(
-            "Donor created successfully with Chapa checkout URL:",
-            chapaResponse.data.checkout_url
+            "Donor created successfully with AfriPay checkout URL:",
+            arifpayResponse.data.checkout_url
           );
 
           res.status(201).json({
@@ -146,19 +117,19 @@ exports.createDonation = asyncHandler(async (req, res) => {
             message: "Donation initialized. Please complete payment.",
             data: {
               donor,
-              checkout_url: chapaResponse.data.checkout_url.trim(),
+              checkout_url: arifpayResponse.data.checkout_url.trim(),
             },
           });
         } else {
-          logger.error("Chapa initialization failed:", chapaResponse);
+          logger.error("AfriPay initialization failed:", arifpayResponse);
           res.status(400).json({
             success: false,
-            message: "Failed to initialize payment with Chapa.",
-            error: chapaResponse,
+            message: "Failed to initialize payment with AfriPay.",
+            error: arifpayResponse,
           });
         }
       } catch (error) {
-        logger.error("Chapa API Error:", {
+        logger.error("AfriPay API Error:", {
           error: error.message,
           stack: error.stack,
         });
@@ -181,16 +152,6 @@ exports.createDonation = asyncHandler(async (req, res) => {
         paymentStatus: "pending",
         transactionId: "manual_" + Date.now(),
       });
-
-      // Send thank you email for bank transfer
-      try {
-        await sendThankYouEmail(donor);
-      } catch (emailErr) {
-        logger.error("Error sending thank you email:", {
-          error: emailErr.message,
-          donorEmail: donor.email,
-        });
-      }
 
       res.status(201).json({
         success: true,
@@ -216,16 +177,6 @@ exports.createDonation = asyncHandler(async (req, res) => {
         paymentStatus: "completed",
         transactionId,
       });
-
-      // Send thank you email
-      try {
-        await sendThankYouEmail(donor);
-      } catch (emailErr) {
-        logger.error("Error sending thank you email:", {
-          error: emailErr.message,
-          donorEmail: donor.email,
-        });
-      }
 
       res.status(201).json({
         success: true,
@@ -267,7 +218,7 @@ exports.verifyChapa = async (req, res) => {
 
     // Verify the payment status with Chapa API
     try {
-      const verificationResult = await chapaUtils.verifyPayment(tx_ref);
+      const verificationResult = await arifpayUtils.verifyPayment(tx_ref);
       logger.info("Chapa verification result:", verificationResult);
 
       // Update payment status based on Chapa verification
@@ -280,17 +231,7 @@ exports.verifyChapa = async (req, res) => {
 
       await donation.save();
 
-      // If payment was successful, send thank you email
-      if (verificationResult.status === "success") {
-        try {
-          await sendThankYouEmail(donation);
-        } catch (emailErr) {
-          logger.error("Error sending thank you email:", {
-            error: emailErr.message,
-            donorEmail: donation.email,
-          });
-        }
-      }
+      // Payment verification completed
 
       // Respond with JSON
       return res.status(200).json({
@@ -310,17 +251,7 @@ exports.verifyChapa = async (req, res) => {
 
       await donation.save();
 
-      // If payment was successful based on webhook, send thank you email
-      if (status === "success") {
-        try {
-          await sendThankYouEmail(donation);
-        } catch (emailErr) {
-          logger.error("Error sending thank you email:", {
-            error: emailErr.message,
-            donorEmail: donation.email,
-          });
-        }
-      }
+      // Payment verification processed based on webhook data
 
       // Redirect to frontend or respond with JSON
       if (req.query.redirect === "true") {
@@ -339,6 +270,56 @@ exports.verifyChapa = async (req, res) => {
     }
   } catch (error) {
     logger.error("Error processing Chapa webhook:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Server error processing payment webhook",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Verify AfriPay payment callback
+// @route   POST /api/donations/verify-arifpay
+// @access  Public
+exports.verifyArifpay = async (req, res) => {
+  try {
+    const { tx_ref, transaction_id, status } = req.body;
+
+    logger.info("Received AfriPay webhook:", {
+      tx_ref,
+      transaction_id,
+      status,
+    });
+
+    // Find donation by tx_ref
+    const donation = await Donor.findOne({ tx_ref });
+
+    if (!donation) {
+      return res.status(404).json({
+        success: false,
+        message: "Donation not found",
+      });
+    }
+
+    // Update payment status based on webhook data
+    donation.paymentStatus = status === "success" ? "completed" : "failed";
+    donation.transactionId = transaction_id || donation.transactionId;
+
+    await donation.save();
+
+    // Payment verification processed
+
+    // Respond with JSON
+    res.status(200).json({
+      success: true,
+      message: "Payment verification processed",
+      data: donation,
+    });
+  } catch (error) {
+    logger.error("Error processing AfriPay webhook:", {
       error: error.message,
       stack: error.stack,
     });
@@ -374,20 +355,7 @@ exports.verifyPayment = async (req, res) => {
 
     await donation.save();
 
-    // If payment was marked as completed, send thank you email
-    if (
-      paymentStatus === "completed" &&
-      donation.paymentStatus !== "completed"
-    ) {
-      try {
-        await sendThankYouEmail(donation);
-      } catch (emailErr) {
-        logger.error("Error sending thank you email:", {
-          error: emailErr.message,
-          donorEmail: donation.email,
-        });
-      }
-    }
+    // Payment status updated successfully
 
     res.status(200).json({
       success: true,

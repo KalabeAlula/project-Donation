@@ -1,26 +1,6 @@
 const Donor = require('../models/Donor');
-const nodemailer = require('nodemailer');
 const axios = require('axios');
 // Placeholder for Chapa integration (replace with actual Chapa SDK or API calls)
-
-// Configure Nodemailer transporter (update with real credentials in .env)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-async function sendThankYouEmail(donor) {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: donor.email,
-    subject: 'Thank You for Your Donation!',
-    text: `Dear ${donor.name},\n\nThank you for your generous donation of $${donor.amount}.\n\nBest regards,\nDonation Foundation Team`
-  };
-  await transporter.sendMail(mailOptions);
-}
 
 exports.createPayment = async (req, res) => {
   try {
@@ -52,7 +32,6 @@ exports.createPayment = async (req, res) => {
       // Save donor info (optionally, only after payment verification)
       const donor = new Donor({ name, email, amount, paymentType, isCompany, companyName });
       await donor.save();
-      await sendThankYouEmail(donor);
       res.status(201).json({ message: 'Donation initialized', donor, checkout_url: chapaRes.data.data.checkout_url });
     } else {
       res.status(400).json({ error: 'Failed to initialize payment with Chapa.' });

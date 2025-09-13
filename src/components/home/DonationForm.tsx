@@ -42,7 +42,7 @@ const DonationForm: React.FC = () => {
         email,
         amount,
         paymentType,
-        paymentMethod: paymentMethod === 'credit_card' ? 'chapa' : paymentMethod, // Ensure 'credit_card' is sent as 'chapa'
+        paymentMethod: paymentMethod === 'credit_card' ? 'arifpay' : paymentMethod,
         isCompany: false
       };
       
@@ -53,9 +53,12 @@ const DonationForm: React.FC = () => {
         console.log('Full donation response:', response);
         console.log('Raw checkout_url:', response.data?.checkout_url);
         
-        if (response.data?.checkout_url) {
+        if (response.data?.checkout_url || response.data?.data?.checkout_url) {
+          // Get the checkout URL from either direct or nested response
+          const checkoutUrl = response.data.checkout_url || response.data.data.checkout_url;
+          
           // Clean the checkout_url to remove any extra characters
-          const cleanCheckoutUrl = response.data.checkout_url
+          const cleanCheckoutUrl = checkoutUrl
             .toString()
             .replace(/[`\s]/g, '')
             .trim();
@@ -64,41 +67,17 @@ const DonationForm: React.FC = () => {
           setChapaCheckoutUrl(cleanCheckoutUrl);
           setDonationData(response.data);
           
-          // Try multiple redirect methods to handle browser security
-          try {
-            // Method 1: Direct redirect
-            window.location.href = cleanCheckoutUrl;
-          } catch (redirectError) {
-            console.error('Direct redirect failed:', redirectError);
-            try {
-              // Method 2: Open in new tab
-              window.open(cleanCheckoutUrl, '_blank');
-            } catch (tabError) {
-              console.error('New tab failed:', tabError);
-              // Method 3: Show manual redirect link
-              setError(`Redirect failed. Please click this link to complete payment: ${cleanCheckoutUrl}`);
-            }
-          }
+          // Redirect to AfriPay checkout URL
+          console.log('Redirecting to AfriPay checkout:', cleanCheckoutUrl);
+          window.location.href = cleanCheckoutUrl;
+          return; // Exit early to prevent showing completion screen
         } else if (response.data.success) {
+          // Handle bank transfer and other methods
           console.log('Payment method:', paymentMethod);
-          console.log('Checkout URL exists:', !!response.data.data.checkout_url);
-          
-          if (paymentMethod === 'credit_card' && response.data.data.checkout_url) {
-            // For Chapa payments, redirect to checkout URL
-            const cleanCheckoutUrl = response.data.data.checkout_url.trim();
-            console.log('Redirecting to Chapa checkout:', cleanCheckoutUrl);
-            
-            // Use window.location.replace for better redirect handling
-            window.location.replace(cleanCheckoutUrl);
-            return; // Exit early to prevent showing completion screen
-          } else {
-            // For other payment methods, show completion screen
-            console.log('Showing completion screen for non-Chapa payment');
-            setDonationData(response.data.data);
-            setIsDonationComplete(true);
-          }
+          setDonationData(response.data.data || response.data);
+          setIsDonationComplete(true);
         } else {
-          setError('There was a problem processing your donation. Please try again.');
+          setError(response.data.message || 'There was a problem processing your donation. Please try again.');
         }
       } catch (error) {
         console.error('Error submitting donation:', error);
@@ -239,7 +218,7 @@ const DonationForm: React.FC = () => {
                         setShowBankDetails(false);
                       }}
                     >
-                      Chapa
+                      AfriPay
                     </motion.button>
                     <motion.button
                       type="button"

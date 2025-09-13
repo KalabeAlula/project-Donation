@@ -19,8 +19,10 @@ const DonationSuccess: React.FC = () => {
         const transactionId = params.get('transaction_id');
         const status = params.get('status');
         
+        console.log('Fetching donation with tx_ref:', txRef, 'or transaction_id:', transactionId);
+        
         if (!txRef && !transactionId) {
-          setError('Missing transaction ID');
+          setError('No transaction reference provided');
           setLoading(false);
           return;
         }
@@ -112,7 +114,7 @@ const DonationSuccess: React.FC = () => {
           {loading ? (
             <div className="text-center p-8 bg-white rounded-xl shadow-lg">
               <div className="animate-spin h-12 w-12 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-lg text-gray-600">Verifying your donation...</p>
+              <p className="text-lg text-gray-600">Loading donation details...</p>
             </div>
           ) : error ? (
             <motion.div 
